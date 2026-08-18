@@ -1,8 +1,6 @@
-# UCS503P Project Template
-
+# UCS503 Project Template
 This is a project template for UCS503P Project (2026-27
 ODD). 
-
 There are 3 reports in LaTeX format, namely *a*)
 Project Proposal, *b*) Project Report Prototype Stage,
 and *c*) Project Report Final -- each in their
