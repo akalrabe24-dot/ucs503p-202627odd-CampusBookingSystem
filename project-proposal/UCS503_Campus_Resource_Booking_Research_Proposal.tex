@@ -1,0 +1,308 @@
+\documentclass[11pt]{article}
+
+% ---------- Packages ----------
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{parskip}
+
+% ---------- Section formatting ----------
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+\setlist[itemize]{leftmargin=*, itemsep=2pt, topsep=2pt}
+
+% ---------- Title block ----------
+\title{
+    \vspace{-2em}
+    \textbf{\Large RESEARCH / PROJECT PROPOSAL}\\[0.5em]
+    \textbf{\large Campus Resource and Booking Management System}\\[0.3em]
+    \large Software Engineering --- UCS503
+}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+\vspace{-3em}
+
+\begin{center}
+\begin{tabular}{ll}
+\textbf{Team Members} & \textbf{Roll Number} \\[4pt]
+Aayati Kalra & 1024030783 \\
+Rishita Jain & 1024030782 \\
+Aditya Bhardwaj & 1024030777 \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\textit{Submission Date: 18 August 2026}\\
+\textit{Faculty Supervisor: Jeelani Asif}
+\end{center}
+
+\vspace{1em}
+
+% =========================================================
+\section{Abstract}
+
+Campus rooms and common venues are used throughout the academic year for society preparation, workshops, sessions and events. The proposed Campus Resource and Booking Management System is a web-based system intended to bring the room selection, availability checking, booking request and permission process into one place. The system will cover the campus locations currently identified for booking: LP, LT, TAN, B Block, C Block, D Block, E Block, F Block, Main Auditorium, GR1, GR2 and CR. Rooms and other bookable resources will be maintained under their respective sections.
+
+The proposed workflow starts with a user selecting an existing society, choosing the type of activity, selecting a location and resource, and entering the required date, time and activity details. The user will also select the relevant morning or night permission category. The request will then be reviewed by the designated permission in-charge. Approval will depend on the merits and genuineness of the reason provided in the application. The system will also maintain booking status and prevent conflicting bookings for the same resource and time.
+
+% =========================================================
+\section{Introduction}
+
+Booking a campus room is a small task when viewed in isolation, but it becomes more involved when different societies are using the same set of spaces for different activities. A society may need a room for preparation before an event, a workshop may require a particular room for a fixed period, and a larger event may need a venue such as the Main Auditorium. In each case, the request has to be connected to a location, a resource, a date and time, a purpose, and the required permission.
+
+The project proposes a single system for managing this workflow. Rather than treating a booking as only a calendar entry, the system treats it as a request that moves through a defined permission process. This distinction is important because the person responsible for permissions reviews the application before the booking is confirmed.
+
+The project is being developed as part of Software Engineering (UCS503). It therefore focuses not only on building a working interface, but also on requirements engineering, system design, data management, validation, role-based access and testing.
+
+% =========================================================
+\section{Problem Statement}
+
+The current project problem is not simply the absence of an online booking form. The larger issue is that a campus resource request contains several connected decisions: which society is requesting the resource, what the activity is, where it will take place, when it will take place, what permission category applies, and whether the request is approved. If these details are handled separately, it becomes harder to get a clear picture of resource availability and request status.
+
+There is also a practical conflict between convenience for the requester and control for the person approving permissions. A requester needs to know whether a suitable resource is available, while the approver needs enough information to judge the request. In the proposed process, the approver will review the application and approve the request when the stated reason is considered genuine and appropriate.
+
+The system therefore needs to connect resource availability with the permission workflow. It must also avoid assigning the same resource to overlapping bookings and should make it clear whether a request is pending, approved, rejected or cancelled.
+
+% =========================================================
+\section{Research Question}
+
+How can a centralized campus resource booking system be designed to manage room/resource selection, availability, permission requests and approval in a single workflow for society preparation, workshops/sessions and events?
+
+A secondary question for the later evaluation stage is whether the proposed workflow makes it easier for requesters and the permission in-charge to understand the status of a booking and reduces the possibility of conflicting resource requests. The method and measures for answering this secondary question will be finalized after the project scope and testing plan are agreed.
+
+% =========================================================
+\section{Motivation}
+
+The motivation for this project comes from the frequent use of campus spaces by societies, students, and event organisers. Although the booking process is similar for different activities, the information and requirements may vary. A simple booking may need only basic details, while events and workshops may require additional information about participants, purpose, and resources.
+
+A centralized system can make the process more organised and transparent by allowing requesters to view available resources and track applications, while the permission in-charge can review and manage requests in one place. The project also provides a practical application of software engineering concepts to a real campus problem.
+
+% =========================================================
+\section{Objectives}
+
+The project will aim to:
+
+\begin{itemize}
+    \item Develop a centralized system for requesting and managing campus rooms and other bookable resources.
+    \item Represent the campus locations and their rooms/resources in a structured hierarchy.
+    \item Allow a user to select an existing society from a maintained list.
+    \item Support the three identified activity categories: society preparation, workshop/session and event.
+    \item Allow users to select a location, resource, date and time before submitting a request.
+    \item Support morning and night permission categories, with the exact timing rules to be finalized.
+    \item Provide a clear approval workflow for the designated permission in-charge.
+    \item Record the reason and other relevant details of each booking request so that the approver can review it.
+    \item Prevent conflicting bookings for the same resource and overlapping time period.
+    \item Allow users to track the status and history of their requests.
+    \item Provide administrative controls for maintaining locations, resources, societies and relevant system data.
+\end{itemize}
+
+% =========================================================
+\section{Scope of the Proposed System}
+
+\begin{itemize}
+    \item Campus resource and room booking.
+    \item Location $\rightarrow$ resource hierarchy covering LP, LT, TAN, B Block, C Block, D Block, E Block, F Block, Main Auditorium, GR1, GR2 and CR.
+    \item Booking for society preparation, workshops/sessions and events.
+    \item Selection of an existing society.
+    \item Date and time selection.
+    \item Morning/night permission category.
+    \item Permission review and approval/rejection.
+    \item Availability and conflict checking.
+    \item Booking status and booking history.
+    \item Administrative maintenance of resources and related records.
+\end{itemize}
+
+% =========================================================
+\section{Initial Functional Requirements}
+
+\begin{longtable}{@{}p{1.6cm}p{3.2cm}p{9.8cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Requirement} & \textbf{Description} \\
+\midrule
+\endhead
+FR-01 & User and society access & The system shall allow an authorized user to access the booking workflow and select an existing society from the available society list. \\[4pt]
+FR-02 & Activity selection & The system shall allow the user to identify the request as society preparation, workshop/session or event. \\[4pt]
+FR-03 & Location selection & The system shall display the configured campus booking locations. \\[4pt]
+FR-04 & Resource selection & The system shall display the rooms/resources associated with the selected location. \\[4pt]
+FR-05 & Date and time & The system shall collect the requested date, start time and end time. \\[4pt]
+FR-06 & Permission category & The system shall allow the requester to select morning or night permission. \\[4pt]
+FR-07 & Activity details & The system shall collect the information needed for the selected activity type. \\[4pt]
+FR-08 & Availability check & The system shall check whether the requested resource has a conflicting booking for the selected time. \\[4pt]
+FR-09 & Request submission & The system shall create a booking request with a trackable status. \\[4pt]
+FR-10 & Approval & The system shall provide the designated permission in-charge with the ability to review and approve or reject requests. \\[4pt]
+FR-11 & Reason for decision & The system shall support recording a reason or comment when a request is rejected or when additional explanation is required. \\[4pt]
+FR-12 & Status tracking & The system shall allow users to see the current status of their requests. \\[4pt]
+FR-13 & Cancellation & The system shall support cancellation of a booking/request, subject to the final rules decided during requirements analysis. \\[4pt]
+FR-14 & Administration & The system shall provide administrative management of locations, rooms/resources, societies and relevant records. \\
+\bottomrule
+\end{longtable}
+
+% =========================================================
+\section{Proposed Methodology}
+
+The project will follow an iterative software development approach. This is a proposed project decision rather than a statement about the current campus process. The work will be divided into requirements, design, implementation, testing and refinement. Requirements will be documented before the corresponding feature is treated as complete, and feedback from testing will be used to refine the next iteration.
+
+\subsection{9.1 Requirements Analysis}
+
+The team will identify the booking types, locations, resources, permission rules and information required for each request. The open items identified in this proposal will be confirmed before the final requirements baseline is prepared. Requirements will be expressed in a form that can be traced to design and testing.
+
+\subsection{9.2 System Design}
+
+The team will prepare the system architecture, use-case model, activity flow, database/entity model and interface structure. Particular attention will be given to the relationship between locations, resources, bookings and permission decisions.
+
+\subsection{9.3 Implementation}
+
+The system will be implemented as a web application using React.js for the frontend, Node.js with Express.js for the backend, and PostgreSQL for database management. JWT will be used for authentication and security, while Git and GitHub will support version control and collaboration.
+
+\subsection{9.4 Validation and Testing}
+
+Testing will cover the booking workflow, access control, input validation, resource availability, overlapping time periods, approval/rejection states, cancellation and administrative operations.
+
+\subsection{9.5 Iteration}
+
+Findings from testing will be used to correct the system and refine requirements where necessary. This is important for a booking system because errors in time handling or status transitions can affect the reliability of the entire workflow.
+
+% =========================================================
+\section{Proposed System Workflow}
+
+The initial workflow is:
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{\centering
+\textbf{Login $\rightarrow$ Select Society $\rightarrow$ Select Activity Type $\rightarrow$ Select Location $\rightarrow$ Select Resource $\rightarrow$ Select Date \& Time $\rightarrow$ Select Morning/Night Permission $\rightarrow$ Enter Activity Details $\rightarrow$ Check Availability $\rightarrow$ Submit Request $\rightarrow$ Permission In-charge Review $\rightarrow$ Approve/Reject $\rightarrow$ Confirmed / Rejected Booking}
+}}
+\end{center}
+
+\vspace{0.5em}
+The approval step is intentionally separate from submission. The requester can submit the application, but the booking becomes confirmed only after the designated permission in-charge reviews the request. The project team has specified that the approver will consider the genuineness of the stated reason when deciding whether to approve a request.
+
+% =========================================================
+\section{Initial Data Model}
+
+The following entities are proposed as the starting point for database design. The exact fields will be finalized during requirements and design.
+
+\begin{longtable}{@{}p{4cm}p{10.6cm}@{}}
+\toprule
+\textbf{Entity} & \textbf{Purpose} \\
+\midrule
+\endhead
+User & Stores user identity, login information and role. \\[4pt]
+Society & Stores the societies available for selection. \\[4pt]
+Location & Stores campus sections such as LP, LT, TAN and the listed blocks/venues. \\[4pt]
+Resource & Stores rooms and other bookable resources belonging to a location. \\[4pt]
+Booking & Stores the requested resource, date, time, activity type, purpose and current status. \\[4pt]
+Permission & Stores the approval/rejection decision, approver and decision details. \\[4pt]
+Maintenance / Unavailability & Stores periods when a resource cannot be booked, if this feature is included. \\
+\bottomrule
+\end{longtable}
+
+% =========================================================
+\section{User Roles}
+
+\begin{longtable}{@{}p{3.6cm}p{11cm}@{}}
+\toprule
+\textbf{Role} & \textbf{Main Responsibility} \\
+\midrule
+\endhead
+Requester / User & Select society, choose activity and resource, submit requests, view status and cancel requests where permitted. \\[4pt]
+Permission In-charge & Review submitted applications and approve or reject them based on the information and reason provided. \\[4pt]
+Administrator & Maintain system data such as societies, locations, rooms/resources and user access. \\
+\bottomrule
+\end{longtable}
+
+% =========================================================
+\section{Expected Outcomes}
+
+The expected outcome is a working prototype that represents the campus booking process as one connected workflow. A user should be able to move from society and activity selection to a resource request and then track the permission decision. The system should also maintain a reliable record of resource usage and prevent confirmed overlapping bookings.
+
+\begin{itemize}
+    \item A structured catalogue of campus locations and bookable resources.
+    \item A booking workflow tailored to preparation, workshop/session and event requests.
+    \item A defined permission and approval workflow.
+    \item Availability and overlap validation.
+    \item User-facing booking status and history.
+    \item Administrative management of the core resource data.
+    \item Software engineering artefacts such as requirements, system design and test cases.
+\end{itemize}
+
+% =========================================================
+\section{Risks and Mitigation}
+
+\begin{longtable}{@{}p{4.6cm}p{10cm}@{}}
+\toprule
+\textbf{Risk} & \textbf{Mitigation} \\
+\midrule
+\endhead
+Incomplete or changing requirements & Confirm the open operational rules before freezing the requirements baseline and keep changes traceable. \\[4pt]
+Incorrect resource inventory & Use the verified campus resource list and treat the current location list separately from the room inventory still to be confirmed. \\[4pt]
+Ambiguity in permission timings & Keep morning/night as configurable categories until exact timings are confirmed. \\[4pt]
+Booking conflicts & Perform overlap validation on the server-side booking logic, not only in the user interface. \\[4pt]
+Unclear approval rules & Document the approver's decision criteria during requirements analysis rather than inventing additional rules. \\[4pt]
+Scope growth & Keep optional features separate from the core booking and permission workflow until the core system is stable. \\
+\bottomrule
+\end{longtable}
+
+% =========================================================
+\section{Current Limitations and Open Decisions}
+
+At the current stage, some details of the system are yet to be confirmed. These will be finalized during the requirements and implementation stages.
+
+\begin{itemize}
+    \item \textbf{Permission Timings:} The exact timings for morning and night permissions will be confirmed according to the campus procedure.
+    \item \textbf{Room Inventory:} The complete list of rooms and resources under each location will be verified before implementation.
+    \item \textbf{Permission In-Charge:} The details of the person responsible for reviewing and approving requests will be confirmed.
+    \item \textbf{Additional Features:} Notifications, analytics and detailed reports will be considered based on the requirements and available development time.
+    \item \textbf{Project Schedule:} The final development timeline and milestones will be decided according to the academic schedule.
+    \item \textbf{Deployment:} The final hosting and deployment setup will be decided during the implementation stage.
+\end{itemize}
+
+These points are kept open so that the final system can be aligned with the actual campus requirements rather than making assumptions at this stage.
+
+% =========================================================
+\section{Proposed Deliverables}
+
+\begin{itemize}
+    \item Requirements specification for the booking and permission workflow.
+    \item Use-case, activity and system/data design diagrams.
+    \item Database schema and implemented database.
+    \item Working web application prototype.
+    \item Booking and permission management modules.
+    \item Test plan and test cases covering the main workflow and edge cases.
+    \item Final project documentation and demonstration.
+\end{itemize}
+
+% =========================================================
+\section{Sections to be Finalized After Further Discussion}
+
+The following sections are intentionally left open because the project team has not yet finalized the required information:
+
+\begin{itemize}
+    \item Detailed evaluation methodology and success measures.
+    \item Project timeline and milestones.
+    \item Tools, infrastructure and budget.
+    \item Detailed testing participants or user study, if any.
+    \item Final technology stack and deployment plan.
+\end{itemize}
+
+\end{document}
