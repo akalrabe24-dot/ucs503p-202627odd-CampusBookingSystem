@@ -10,7 +10,7 @@ The system covers campus locations such as **LP, LT, TAN, B Block, C Block, D Bl
 
 The repository is organised into the following folders:
 
-- `proposal/` — Project proposal and related documents.
+- `proposal/` — Project proposal and related documents
 - `report-prototype/` — Project report for the prototype stage.
 - `report-final/` — Final project report.
 - `journals/` — Individual project journals for each team member.
