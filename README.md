@@ -1,43 +1,53 @@
-# UCS503 Project Template
-This is a project template for UCS503P Project (2026-27
-ODD). 
-There are 3 reports in LaTeX format, namely *a*)
-Project Proposal, *b*) Project Report Prototype Stage,
-and *c*) Project Report Final -- each in their
-respective folders.
+# Campus Resource and Booking Management System
 
-Journals are stacked under the folder `journals`, one
-folder for each team member.  A sample entry has been
-made for example.
+This repository contains the project work for the **UCS503P Project (2026–27 ODD)**.
 
-The source code is contained within the folder `code`.
+The project focuses on developing a web-based **Campus Resource and Booking Management System** for managing campus rooms and other bookable resources used for society preparation, workshops/sessions, and events.
 
-The documentation is under folder `docs`.
+The system covers campus locations such as **LP, LT, TAN, B Block, C Block, D Block, E Block, F Block, Main Auditorium, GR1, GR2 and CR**.
 
-All other aspects of code organisation are left to the
-discretion of the user(s).
+## Project Structure
 
+The repository is organised into the following folders:
 
-## Docs
+- `proposal/` — Project proposal and related documents.
+- `report-prototype/` — Project report for the prototype stage.
+- `report-final/` — Final project report.
+- `journals/` — Individual project journals for each team member.
+- `code/` — Source code of the web application.
+- `docs/` — Project documentation and supporting material.
 
-As of now, the `docs` is just an organised collection
-of markdown (`md`) files.  But the build procedure is
-using [`mkdocs`](https://google.com/search?q=mkdocs)
-backend.  As a result, any commit into the `master`
-branch of github repository would result in CI/CD based
-build and deployment of the documentation including the
-journals.
+The exact organisation of the source code and supporting files may be extended as the project develops.
 
-For a local DEV-version of the docs for viewing and
-testing, install the local env and issue the following
-command:
+## System Overview
 
-``` shell
-make docs
-```
+The system provides a centralised workflow for requesting and managing campus resources.
 
-### Local `env` for `docs`
+The basic workflow is:
 
-``` shell
-
-```
+```text
+Login
+  ↓
+Select Society
+  ↓
+Select Activity Type
+  ↓
+Select Location
+  ↓
+Select Room / Resource
+  ↓
+Select Date & Time
+  ↓
+Select Morning / Night Permission
+  ↓
+Enter Activity Details
+  ↓
+Check Availability
+  ↓
+Submit Request
+  ↓
+Permission In-charge Review
+  ↓
+Approve / Reject
+  ↓
+Booking Confirmed / Rejected
