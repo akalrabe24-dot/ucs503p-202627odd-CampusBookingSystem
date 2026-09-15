@@ -1,0 +1,1 @@
+export const StatusBadge = ({ status, size = 'md', showDot = true }: { status: string; size?: 'sm' | 'md' | 'lg'; showDot?: boolean }) => <span className={`status-label status-${status.toLowerCase()} status-${size}`}>{showDot && <span aria-hidden="true" className="status-dot" />}{status}</span>;
