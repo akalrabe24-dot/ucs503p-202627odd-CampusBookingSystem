@@ -10,3 +10,7 @@ Worked on the **Problem Statement, Objectives and Scope** sections of the projec
 ### Week 3 — Use Case, DFDs & Revised Proposal
 
 Worked on the **Use Case Diagram** of the Campus Booking System. I helped identify the major actors and their interactions with the system and organised the different use cases. I also contributed to **revising the project proposal** based on the updated diagrams and project requirements and checked the final content for consistency.
+
+### Week 4 — ER Diagram + Prototype Documentation
+
+Worked on designing the Entity Relationship (ER) Diagram for the Campus Booking System. I identified the main entities, attributes and relationships required for the system and helped ensure that the database structure matched the project requirements. I also contributed to preparing the prototype documentation, including organising the content and explaining the main prototype features.
