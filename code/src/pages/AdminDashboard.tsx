@@ -14,6 +14,7 @@ import {
   MapPin,
   CheckCircle2,
 } from 'lucide-react';
+import { errorMessage } from '../services/supabase';
 import { storageService, subscribeToStorageChanges } from '../services/storageService';
 import { CampusRoom, Society, CampusLocationCode, RoomStatus } from '../types';
 import { MetricCard } from '../components/common/MetricCard';
@@ -80,7 +81,18 @@ export const AdminDashboard: React.FC = () => {
     setShowRoomModal(true);
   };
 
-  const handleSaveRoom = (e: React.FormEvent) => {
+  const [writeError, setWriteError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const save = async (action: () => void | Promise<void>) => {
+    if (saving) return false;
+    setSaving(true);
+    setWriteError('');
+    try { await action(); return true; }
+    catch (error) { setWriteError(errorMessage(error)); return false; }
+    finally { setSaving(false); }
+  };
+
+  const handleSaveRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     const facilitiesArray = roomFacilities
       .split(',')
@@ -96,10 +108,10 @@ export const AdminDashboard: React.FC = () => {
         type: roomType,
         facilities: facilitiesArray,
       };
-      storageService.updateRoom(updated);
+      if (!await save(() => storageService.updateRoom(updated))) return;
     } else {
       const newRoom: CampusRoom = {
-        id: `${roomLocationId}-${Date.now().toString().slice(-3)}`,
+        id: `${roomLocationId}-${crypto.randomUUID()}`,
         name: roomName,
         locationId: roomLocationId,
         capacity: roomCapacity,
@@ -107,14 +119,14 @@ export const AdminDashboard: React.FC = () => {
         facilities: facilitiesArray,
         status: 'Available',
       };
-      storageService.addRoom(newRoom);
+      if (!await save(() => storageService.addRoom(newRoom))) return;
     }
     setShowRoomModal(false);
   };
 
   const handleToggleRoomStatus = (room: CampusRoom) => {
     const newStatus: RoomStatus = room.status === 'Unavailable' ? 'Available' : 'Unavailable';
-    storageService.updateRoom({ ...room, status: newStatus });
+    void save(() => storageService.updateRoom({ ...room, status: newStatus }));
   };
 
   // Society actions
@@ -140,7 +152,7 @@ export const AdminDashboard: React.FC = () => {
     setShowSocietyModal(true);
   };
 
-  const handleSaveSociety = (e: React.FormEvent) => {
+  const handleSaveSociety = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingSociety) {
       const updated: Society = {
@@ -152,10 +164,10 @@ export const AdminDashboard: React.FC = () => {
         leadEmail: socLeadEmail,
         memberCount: socMembers,
       };
-      storageService.updateSociety(updated);
+      if (!await save(() => storageService.updateSociety(updated))) return;
     } else {
       const newSoc: Society = {
-        id: `soc-${socCode.toLowerCase()}-${Date.now().toString().slice(-3)}`,
+        id: `soc-${socCode.toLowerCase()}-${crypto.randomUUID()}`,
         name: socName,
         code: socCode.toUpperCase(),
         category: socCategory,
@@ -164,13 +176,14 @@ export const AdminDashboard: React.FC = () => {
         memberCount: socMembers,
         description: 'Active campus society.',
       };
-      storageService.addSociety(newSoc);
+      if (!await save(() => storageService.addSociety(newSoc))) return;
     }
     setShowSocietyModal(false);
   };
 
   return (
     <div className="space-y-6">
+      {writeError && !showRoomModal && !showSocietyModal && <p role="alert">{writeError}</p>}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -447,6 +460,7 @@ export const AdminDashboard: React.FC = () => {
         maxWidth="lg"
       >
         <form onSubmit={handleSaveRoom} className="space-y-4 text-xs">
+          {writeError && <p role="alert">{writeError}</p>}
           <div>
             <label className="block font-semibold uppercase text-slate-700 mb-1">
               Room Name <span className="text-rose-500">*</span>
@@ -532,7 +546,7 @@ export const AdminDashboard: React.FC = () => {
               Cancel
             </button>
             <button
-              type="submit"
+              type="submit" disabled={saving}
               className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs"
             >
               {editingRoom ? 'Save Changes' : 'Add Room'}
@@ -550,6 +564,7 @@ export const AdminDashboard: React.FC = () => {
         maxWidth="lg"
       >
         <form onSubmit={handleSaveSociety} className="space-y-4 text-xs">
+          {writeError && <p role="alert">{writeError}</p>}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold uppercase text-slate-700 mb-1">
@@ -649,7 +664,7 @@ export const AdminDashboard: React.FC = () => {
               Cancel
             </button>
             <button
-              type="submit"
+              type="submit" disabled={saving}
               className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs"
             >
               {editingSociety ? 'Save Changes' : 'Register Society'}

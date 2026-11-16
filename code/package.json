@@ -6,18 +6,21 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "lint": "oxlint src tests vite.config.ts",
+    "test:db": "node tests/supabase-db.mjs",
     "test:smoke": "node tests/portal-smoke.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "@tailwindcss/vite": "^4.3.3",
     "lucide-react": "^1.44.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3"
   },
-    "devDependencies": {
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

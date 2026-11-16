@@ -18,6 +18,10 @@ The repository is organised into the following folders:
 
 The structure may be extended as the project develops.
 
+## Run the portal
+
+Follow the [Supabase and frontend setup guide](code/README.md) to provision the database, sign in, and run the app.
+
 ## System Overview
 
 The system provides a centralised workflow for requesting and managing campus resources.

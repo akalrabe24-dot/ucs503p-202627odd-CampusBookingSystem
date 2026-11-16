@@ -1,67 +1,57 @@
-# Campus Reserve — Thapar Institute
+# Campus Reserve
 
-A redesigned campus resource and booking portal. The visual direction takes inspiration from White Desert's editorial composition, with original campus-specific layouts: architectural photography, warm paper, forest-green type, terracotta accents, square controls, fine rules, and an asymmetrical overview.
+The portal uses Supabase Postgres for the database, Supabase Auth for email/password sign-in, and the Supabase Data API for application requests. The React frontend can run locally or on GitHub Pages.
 
-## Run locally
+## Set up a Supabase project
 
-1. Install Node.js 22.12 or newer (verified with Node 24.20).
-2. Extract the ZIP and open a terminal in `campus_resource_managment`, the folder containing `package.json`.
-3. Run:
+1. Use the campus booking project in the [Supabase dashboard](https://supabase.com/dashboard/projects). For a new, empty project, apply the migration from the repository root:
+
+   ```sh
+   supabase login
+   supabase link --project-ref YOUR_PROJECT_REF
+   supabase migration list
+   supabase db push --dry-run
+   supabase db push
+   ```
+
+   If the project already has campus tables or data, inspect its schema and migration history before pushing and reconcile the migration with the existing tables. The migration follows the repository's [ER diagram](../docs/Diagrams_CampusBookingSystem/ER-Diagram.jpeg), with Supabase Auth storing credentials and a profiles table storing campus roles and society assignments.
+
+2. Import the campus locations, resources and societies before provisioning students. For a prototype, review and run [seed.sql](../supabase/seed.sql) in the dashboard SQL Editor. It contains the checked-in sample catalog and omits demo bookings and accounts. For the live campus project, load the approved campus catalog.
+3. In Authentication settings, enable Email and disable public signups. Set the Site URL to the deployed portal URL. Create each account through Authentication → Users, then add its profile through the SQL Editor using that account's UUID. Use an existing society ID for students and leave the society column empty for staff.
+
+   ```sql
+   insert into public.profiles (id, name, email, role, "societyId")
+   select id, 'Student name', email, 'student', 'soc-ieee'
+   from auth.users
+   where email = 'student@example.edu';
+   ```
+
+   Staff roles are `incharge` and `admin`. A profile is required for portal access.
+
+4. Copy [the environment example](.env.example) to `code/.env.local`. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from the project Connect dialog. Use the publishable key or legacy `anon` key. Keep database passwords, access tokens, and secret or service-role keys out of browser configuration and Git.
+
+See the Supabase guides for [database migrations](https://supabase.com/docs/guides/local-development/database-migrations), [React sign-in](https://supabase.com/docs/guides/auth/quickstarts/react), and [API keys](https://supabase.com/docs/guides/getting-started/api-keys).
+
+## Run and verify
+
+Use Node.js 22.12 or newer. From `code/`:
 
 ```sh
 npm ci
 npm run dev
-```
-
-4. Open the local URL printed in the terminal, normally http://localhost:5173. Keep the terminal running. Use Ctrl+C to stop.
-
-If PowerShell blocks `npm.ps1`, use `npm.cmd ci` and `npm.cmd run dev` instead.
-
-Do not double-click `index.html` or serve the source with Live Server. Vite transforms the TypeScript and resolves its dependencies. The entry sequence is `index.html` → `src/main.tsx` → `src/App.tsx`.
-
-## Build and check
-
-```sh
 npm run build
 npm run test:smoke
-npm run preview
+npm run test:db
 ```
 
-The production build is in `dist/`, also included in this archive. Preview normally opens at http://localhost:4173. If publishing the built folder elsewhere, configure the host to return `index.html` for application routes.
+Open the URL printed by Vite, including the repository path. Use `npm.cmd` on Windows if PowerShell blocks `npm.ps1`. For local Supabase with Docker, run `supabase start` and `supabase db reset` from the repository root, then use the local API URL and publishable key in `code/.env.local`. The database test runs the migration and seed in embedded Postgres with test Auth identities and exercises RLS, booking conflicts, status transitions, maintenance and inbox isolation.
 
-## What's included
+To check the hosted setup, sign in as a student and submit a request, inspect the same room and date from a second student account, approve the request as in-charge, and confirm the original student's inbox receives the decision. A pending or approved request blocks overlaps across accounts. The availability page uses campus time (IST) and only shows booking details to users allowed to see that request. Maintenance windows can be entered in `maintenance_unavailability` with explicit time-zone offsets. An overlapping active booking must be resolved before adding such a window.
 
-- Editorial campus overview, society-specific booking totals, recent requests and campus directory links.
-- Responsive horizontal navigation, mobile menu, account switching and notification panel.
-- Redesigned sign-in screen with the existing demo personas.
-- Availability schedule with location, room and date filters. Selecting an hourly slot carries the room, date and time into the booking form.
-- Eight-step reservation form, contextual activity details, conflict checks, night-permission validation, request review and confirmation.
-- Existing booking search, status filters, cancellation and booking details.
-- In-charge approval/rejection flows and admin room/society management, with navigation synchronized to the relevant section.
-- Keyboard-operable selection controls, visible focus styles, reduced-motion support and native dialogs with Escape handling and focus management.
+For GitHub Pages, set repository Actions variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` before running the deployment workflow. The workflow builds from source. If hosting the built folder elsewhere, configure the host to fall back to `index.html` for application routes.
 
-New design files are in `src/design/`. Shared metrics, status indicators and dialogs are in `src/components/common/`. Existing business screens and booking logic remain in `src/pages/` and `src/services/`.
-
-## Demo access and data
-
-This is a frontend prototype, not a production authentication system. The root route opens the student demo by default. Open `/login` or the account menu to switch between student, permission in-charge and campus admin. Passwords are not verified.
-
-Bookings, rooms, societies and notifications use browser localStorage. There is no backend, database service or `.env` configuration to install. The demo does not synchronize data across browsers or devices. Existing browser data is preserved.
-
-## Stack
-
-React 19, TypeScript 6, Vite 8, React Router 7, Tailwind CSS 4, and Lucide React. The original package dependencies and lockfile are preserved; `npm ci` installs the required versions.
+For an isolated browser demo, leave both connection variables unset and set `VITE_CAMPUS_DEMO=true`. Demo bookings and accounts use browser-local data and are separate from hosted data.
 
 ## Image source
 
-The Thapar Learning Laboratory photograph is served from the architect's site and requires internet access:
-
-- https://mcculloughmulvin.com/projects/thapar-university-learning-centre
-
-The photograph is credited in the interface and is not bundled in this archive. No open redistribution license was identified. A typographic fallback appears if the image cannot load. White Desert's text, photographs and implementation were not copied into the portal.
-
-## Verification
-
-The production build passed. All 32 smoke checks passed, covering rendering of the eight main screens, availability links, admin routing, unavailable rooms, booking conflict boundaries, approval/rejection/cancellation and notification state. The tests use isolated in-memory storage and do not alter browser data.
-
-Automated browser visual and interaction testing could not run because a saved browser-access preference blocked the local preview. The responsive layouts are implemented, but a full visual review remains advisable.
+The sign-in screen credits the Thapar Learning Laboratory photograph to [McCullough Mulvin Architects](https://mcculloughmulvin.com/projects/thapar-university-learning-centre).

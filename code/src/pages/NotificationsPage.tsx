@@ -9,6 +9,7 @@ import {
   Trash2,
   CalendarCheck,
 } from 'lucide-react';
+import { errorMessage } from '../services/supabase';
 import { storageService, subscribeToStorageChanges } from '../services/storageService';
 import { SystemNotification } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -28,12 +29,17 @@ export const NotificationsPage: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleMarkAllAsRead = () => {
-    visibleNotifications.forEach(notif => storageService.markNotificationAsRead(notif.id));
+  const [writeError, setWriteError] = useState('');
+  const handleMarkAllAsRead = async () => {
+    setWriteError('');
+    try { await storageService.markAllNotificationsAsRead(); }
+    catch (error) { setWriteError(errorMessage(error)); }
   };
 
-  const handleNotificationClick = (notif: SystemNotification) => {
-    storageService.markNotificationAsRead(notif.id);
+  const handleNotificationClick = async (notif: SystemNotification) => {
+    setWriteError('');
+    try { await storageService.markNotificationAsRead(notif.id); }
+    catch (error) { setWriteError(errorMessage(error)); return; }
     if (user.role === 'incharge') {
       navigate('/incharge/pending');
     } else {
@@ -45,6 +51,7 @@ export const NotificationsPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {writeError && <p role="alert">{writeError}</p>}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -52,7 +59,7 @@ export const NotificationsPage: React.FC = () => {
             The latest updates.
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Real-time status updates on permission requests, venue clearances, and campus reminders.
+            Status updates on permission requests, venue clearances, and campus reminders.
           </p>
         </div>
 

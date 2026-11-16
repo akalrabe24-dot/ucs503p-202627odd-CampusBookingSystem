@@ -12,6 +12,7 @@ import {
   Building,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { errorMessage } from '../services/supabase';
 import { storageService, subscribeToStorageChanges } from '../services/storageService';
 import { Booking, BookingStatus } from '../types';
 import { StatusBadge } from '../components/common/StatusBadge';
@@ -72,17 +73,20 @@ export const MyBookingsPage: React.FC = () => {
     return myBookings.filter((b) => b.status === status).length;
   };
 
-  const handleCancelBooking = (booking: Booking) => {
+  const [writeError, setWriteError] = useState('');
+  const handleCancelBooking = async (booking: Booking) => {
     if (window.confirm(`Are you sure you want to cancel booking request ${booking.id}?`)) {
-      storageService.updateBookingStatus(booking.id, 'Cancelled', {
-        rejectionReason: 'Cancelled by applicant student.',
-      });
-      setSelectedBooking(null);
+      setWriteError('');
+      try {
+        await storageService.updateBookingStatus(booking.id, 'Cancelled');
+        setSelectedBooking(null);
+      } catch (error) { setWriteError(errorMessage(error)); }
     }
   };
 
   return (
     <div className="space-y-6">
+      {writeError && <p role="alert">{writeError}</p>}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

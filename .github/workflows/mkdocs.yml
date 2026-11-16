@@ -34,7 +34,17 @@ jobs:
         working-directory: code
         run: npm ci
 
+      - name: Test portal and database
+        working-directory: code
+        run: |
+          npm run test:smoke
+          npm run test:db
+
       - name: Build React/Vite application
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_CAMPUS_DEMO: ${{ vars.VITE_CAMPUS_DEMO }}
         working-directory: code
         run: npm run build
 
