@@ -12,6 +12,7 @@ import {
   FileCheck2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { errorMessage } from '../services/supabase';
 import { storageService, subscribeToStorageChanges } from '../services/storageService';
 import { Booking, BookingStatus, PermissionType } from '../types';
 import { MetricCard } from '../components/common/MetricCard';
@@ -100,23 +101,34 @@ export const InChargeDashboard: React.FC<InChargeDashboardProps> = ({
     searchQuery,
   ]);
 
+  const [writeError, setWriteError] = useState('');
+  const [reviewing, setReviewing] = useState(false);
+  const review = async (action: () => unknown) => {
+    if (reviewing) return false;
+    setReviewing(true);
+    setWriteError('');
+    try { await action(); return true; }
+    catch (error) { setWriteError(errorMessage(error)); return false; }
+    finally { setReviewing(false); }
+  };
+
   // Direct Approval
-  const handleApprove = (booking: Booking) => {
-    storageService.updateBookingStatus(booking.id, 'Approved', {
+  const handleApprove = async (booking: Booking) => {
+    if (!await review(() => storageService.updateBookingStatus(booking.id, 'Approved', {
       reviewerName: user.name,
       approvalRemarks: 'Standard university space authorization granted with premises handover.',
-    });
+    }))) return;
     if (selectedBooking?.id === booking.id) {
       setSelectedBooking(null);
     }
   };
 
   // Rejection Confirmation from modal
-  const handleConfirmReject = (bookingId: string, reason: string) => {
-    storageService.updateBookingStatus(bookingId, 'Rejected', {
+  const handleConfirmReject = async (bookingId: string, reason: string) => {
+    if (!await review(() => storageService.updateBookingStatus(bookingId, 'Rejected', {
       reviewerName: user.name,
       rejectionReason: reason,
-    });
+    }))) return;
     setRejectingBooking(null);
     if (selectedBooking?.id === bookingId) {
       setSelectedBooking(null);
@@ -125,6 +137,7 @@ export const InChargeDashboard: React.FC<InChargeDashboardProps> = ({
 
   return (
     <div className="space-y-6">
+      {writeError && <p role="alert">{writeError}</p>}
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

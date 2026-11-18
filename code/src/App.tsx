@@ -23,7 +23,7 @@ const RoleBasedHome: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           {/* Public Login */}
           <Route path="/login" element={<LoginPage />} />
@@ -64,7 +64,7 @@ export const App: React.FC = () => {
           </Route>
 
           {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/student/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { errorMessage } from '../services/supabase';
 import { storageService, subscribeToStorageChanges } from '../services/storageService';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { BookingDetailsModal } from '../components/booking/BookingDetailsModal';
@@ -10,6 +11,7 @@ export const campusPhoto = 'https://s3-eu-west-1.amazonaws.com/mcculloughmulvin-
 const formatDate = (date: string) => new Date(`${date}T12:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 export const CampusOverview = () => {
   const { user } = useAuth();
+  const [writeError, setWriteError] = useState('');
   const [bookings, setBookings] = useState(storageService.getBookings);
   const [selected, setSelected] = useState<Booking | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
@@ -28,6 +30,14 @@ export const CampusOverview = () => {
     <div className="overview-bottom"><section className="request-section"><div className="section-heading"><div><span className="eyebrow">02 / YOUR SCHEDULE</span><h2>On the books.</h2></div><Link className="underlined-link" to="/student/bookings">View all requests</Link></div><div className="requests-table-wrap"><table className="requests-table"><thead><tr><th>ACTIVITY / SPACE</th><th>WHEN</th><th>STATUS</th><th><span className="sr-only">Details</span></th></tr></thead><tbody>{mine.slice(0, 4).map(b => <tr key={b.id}><td><strong>{'workshopName' in b.details ? b.details.workshopName : 'eventName' in b.details ? b.details.eventName : b.activityType}</strong><span>{b.roomName} · {b.locationName}</span></td><td><strong>{formatDate(b.date)}</strong><span>{b.startTime}–{b.endTime}</span></td><td><StatusBadge status={b.status} /></td><td><button className="request-open" aria-label={`View booking ${b.id}`} onClick={() => setSelected(b)}>↗</button></td></tr>)}</tbody></table>{mine.length === 0 && <div className="empty-requests"><p>Your next gathering starts here.</p><Link className="underlined-link" to="/student/book">Make your first booking</Link></div>}</div></section>
     <aside className="campus-directory"><span className="eyebrow">03 / EXPLORE</span><h2>Across<br /><em>campus.</em></h2><p>{storageService.getLocations().length} locations. A space for every kind of gathering.</p><div className="directory-links">{[['Lecture theatres', 'LT'], ['Library Plaza', 'LP'], ['Main auditorium', 'Main Auditorium']].map(([name, id], i) => <Link key={id} to={`/availability?location=${encodeURIComponent(id)}`}><span>0{i + 1}</span><strong>{name}</strong><span aria-hidden="true">↗</span></Link>)}</div><Link className="underlined-link" to="/availability">See all spaces</Link></aside></div>
     <p className="photo-credit">Architecture photograph: <a href="https://mcculloughmulvin.com/projects/thapar-university-learning-centre" target="_blank" rel="noreferrer">McCullough Mulvin Architects</a></p>
-    <BookingDetailsModal isOpen={!!selected} booking={selected} onClose={() => setSelected(null)} canManage={false} onCancel={b => { if (window.confirm(`Cancel booking ${b.id}?`)) { storageService.updateBookingStatus(b.id, 'Cancelled', { rejectionReason: 'Cancelled by applicant student.' }); setSelected(null); } }} />
+    {writeError && <p role="alert">{writeError}</p>}
+    <BookingDetailsModal isOpen={!!selected} booking={selected} onClose={() => setSelected(null)} canManage={false} onCancel={async b => {
+      if (!window.confirm(`Cancel booking ${b.id}?`)) return;
+      setWriteError('');
+      try {
+        await storageService.updateBookingStatus(b.id, 'Cancelled');
+        setSelected(null);
+      } catch (error) { setWriteError(errorMessage(error)); }
+    }} />
   </div>;
 };

@@ -20,6 +20,8 @@ import {
   Search,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { demoMode, errorMessage } from '../services/supabase';
+import { useRoomSchedule } from '../services/useRoomSchedule';
 import { storageService } from '../services/storageService';
 import {
   ActivityType,
@@ -43,7 +45,8 @@ export const BookResourcePage: React.FC = () => {
   // Master Data from Storage
   const locations = storageService.getLocations();
   const allRooms = storageService.getRooms();
-  const societies = storageService.getSocieties();
+  const allSocieties = storageService.getSocieties();
+  const societies = useMemo(() => demoMode ? allSocieties : allSocieties.filter(society => society.id === user.societyId), [allSocieties, user.societyId]);
   const requestedRoom = allRooms.find(r => r.id === params.get('room'));
   const initialLocation = requestedRoom?.locationId || locations.find(l => l.id === params.get('location'))?.id || 'LT';
   const initialRoom = requestedRoom || allRooms.find(r => r.locationId === initialLocation);
@@ -65,8 +68,7 @@ export const BookResourcePage: React.FC = () => {
   const [selectedRoomId, setSelectedRoomId] = useState<string>(initialRoom?.id || '');
 
   // Date and Time
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrow = new Date(Date.now() + 86_400_000);
   const suppliedDate = params.get('date');
   const defaultDate = suppliedDate && /^\d{4}-\d{2}-\d{2}$/.test(suppliedDate) && !Number.isNaN(new Date(suppliedDate).getTime()) ? suppliedDate : localDate(tomorrow);
 
@@ -75,7 +77,7 @@ export const BookResourcePage: React.FC = () => {
   const [endTime, setEndTime] = useState<string>(validTime(params.get('end'), '17:00'));
 
   // Permission selection
-  const [permissionType, setPermissionType] = useState<PermissionType>(Number((params.get('end') || '17:00').slice(0, 2)) > 20 || Number((params.get('start') || '14:00').slice(0, 2)) >= 20 ? 'Night Permission' : 'Morning Permission');
+  const [permissionType, setPermissionType] = useState<PermissionType>(validTime(params.get('end'), '17:00') > '20:00' ? 'Night Permission' : 'Morning Permission');
 
   // Activity Details (Contextual)
   // Society Prep
@@ -106,6 +108,7 @@ export const BookResourcePage: React.FC = () => {
 
   // Submission & Validation Feedback
   const [validationError, setValidationError] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
   const [submittedBooking, setSubmittedBooking] = useState<Booking | null>(null);
 
   // Derived filtered entities
@@ -125,12 +128,9 @@ export const BookResourcePage: React.FC = () => {
     allRooms.find((r) => r.id === selectedRoomId) || availableRoomsForLocation[0] || allRooms[0];
 
   // Collision Check
-  const availabilityCheck = useMemo(() => {
-    if (!selectedRoomId || !bookingDate || !startTime || !endTime) {
-      return { available: true };
-    }
-    return storageService.checkRoomAvailability(selectedRoomId, bookingDate, startTime, endTime);
-  }, [selectedRoomId, bookingDate, startTime, endTime]);
+  const schedule = useRoomSchedule(selectedRoomId, bookingDate);
+  const conflict = schedule.slots.find(slot => startTime < slot.endTime && endTime > slot.startTime);
+  const availabilityCheck = { available: !conflict && !schedule.loading && !schedule.error };
 
   // Handle Equipment checkboxes
   const toggleEquipment = (
@@ -186,9 +186,13 @@ export const BookResourcePage: React.FC = () => {
         setValidationError('End time must be later than start time.');
         return false;
       }
+      if (startTime < '08:00' || endTime > '22:00') {
+        setValidationError('Choose a time between 08:00 and 22:00 (IST).');
+        return false;
+      }
       if (!availabilityCheck.available) {
         setValidationError(
-          `Conflict detected! This room is already reserved for "${availabilityCheck.conflictingBooking?.societyName}" during this time (${availabilityCheck.conflictingBooking?.startTime} - ${availabilityCheck.conflictingBooking?.endTime}). Please choose another time or room.`
+          schedule.error || (schedule.loading ? 'Checking room availability. Try again in a moment.' : 'This slot is reserved or blocked for maintenance. Choose another time or room.')
         );
         return false;
       }
@@ -255,10 +259,10 @@ export const BookResourcePage: React.FC = () => {
   };
 
   // Submission handler
-  const handleSubmitBooking = () => {
+  const handleSubmitBooking = async () => {
+    if (submitting) return;
     const latestRoom = storageService.getRooms().find(room => room.id === selectedRoomId);
-    const latestAvailability = storageService.checkRoomAvailability(selectedRoomId, bookingDate, startTime, endTime);
-    if (!latestRoom || latestRoom.status === 'Unavailable' || !latestAvailability.available) {
+    if (!selectedSociety || !selectedLocation || !latestRoom || latestRoom.status === 'Unavailable' || conflict) {
       setValidationError('This space is no longer available for your chosen time. Please choose another room or time slot.');
       setCurrentStep(4);
       return;
@@ -298,26 +302,34 @@ export const BookResourcePage: React.FC = () => {
       participants = eventAttendance;
     }
 
-    const newBooking = storageService.addBooking({
-      societyId: selectedSociety.id,
-      societyName: selectedSociety.name,
-      activityType,
-      locationId: selectedLocation.id,
-      locationName: selectedLocation.name,
-      roomId: selectedRoom.id,
-      roomName: selectedRoom.name,
-      date: bookingDate,
-      startTime,
-      endTime,
-      permissionType,
-      purpose: purposeText,
-      participantCount: participants,
-      details: detailsPayload,
-      submittedBy: user.id,
-      submittedByName: user.name,
-    });
+    setSubmitting(true);
+    setValidationError('');
+    try {
+      const newBooking = await storageService.addBooking({
+        societyId: selectedSociety.id,
+        societyName: selectedSociety.name,
+        activityType,
+        locationId: selectedLocation.id,
+        locationName: selectedLocation.name,
+        roomId: selectedRoom.id,
+        roomName: selectedRoom.name,
+        date: bookingDate,
+        startTime,
+        endTime,
+        permissionType,
+        purpose: purposeText,
+        participantCount: participants,
+        details: detailsPayload,
+        submittedBy: user.id,
+        submittedByName: user.name,
+      });
 
-    setSubmittedBooking(newBooking);
+      setSubmittedBooking(newBooking);
+    } catch (error) {
+      setValidationError(errorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const stepsList = [
@@ -682,7 +694,7 @@ export const BookResourcePage: React.FC = () => {
                       🔴 This room is already booked during this time
                     </p>
                     <p className="text-[11px] text-rose-700 mt-0.5">
-                      Reserved by <strong>{availabilityCheck.conflictingBooking?.societyName}</strong> ({availabilityCheck.conflictingBooking?.startTime} - {availabilityCheck.conflictingBooking?.endTime}).
+                      {schedule.error || (schedule.loading ? 'Checking availability…' : `Busy from ${conflict?.startTime} to ${conflict?.endTime}.`)}
                       Please adjust the time slot or choose another hall.
                     </p>
                   </div>
@@ -1195,6 +1207,7 @@ export const BookResourcePage: React.FC = () => {
           <button
             type="button"
             onClick={handleSubmitBooking}
+            disabled={submitting}
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-sm transition-colors"
           >
             <CheckCircle2 className="h-4 w-4" />

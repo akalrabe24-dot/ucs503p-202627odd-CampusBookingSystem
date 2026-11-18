@@ -7,6 +7,9 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 // Isolated storage: these checks never read or change the browser's demo data.
 const data = new Map();
 globalThis.localStorage = { getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value), removeItem: key => data.delete(key), clear: () => data.clear() };
+process.env.VITE_CAMPUS_DEMO = 'true';
+process.env.VITE_SUPABASE_URL = '';
+process.env.VITE_SUPABASE_PUBLISHABLE_KEY = '';
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 const h = React.createElement;
 let assertions = 0;
